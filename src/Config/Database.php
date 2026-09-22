@@ -12,20 +12,21 @@ class Database
     public static function getInstance(): PDO
     {
         if (self::$connection === null) {
-            $host     = $_ENV['DB_HOST'] ?? '127.0.0.1';
-            $port     = $_ENV['DB_PORT'] ?? '5432';
-            $dbName   = $_ENV['DB_DATABASE'] ?? 'warehouse_manager';
-            $username = $_ENV['DB_USERNAME'] ?? 'postgres';
-            $password = $_ENV['DB_PASSWORD'] ?? 'postgres';
+            $host     = $_ENV['DB_HOST'] ?? null;
+            $port     = $_ENV['DB_PORT'] ?? null;
+            $dbName   = $_ENV['DB_DATABASE'] ?? null;
+            $username = $_ENV['DB_USERNAME'] ?? null;
+            $password = $_ENV['DB_PASSWORD'] ?? null;
+
+            if (!$host || !$port || !$dbName || !$username || $password === null) {
+                throw new RuntimeException("Thiếu cấu hình CSDL trong file .env. Vui lòng kiểm tra lại các biến DB_*.");
+            }
 
             $dsn = "pgsql:host={$host};port={$port};dbname={$dbName}";
 
             $options = [
-                // Báo lỗi dưới dạng Exception để dễ xử lý try-catch
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                // Mặc định trả về dữ liệu dạng mảng kết hợp (assoc array)
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                // Giữ kiểu dữ liệu chuẩn từ DB (int/float không bị biến thành string)
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ];
 
