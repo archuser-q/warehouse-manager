@@ -12,7 +12,7 @@
             <select name="warehouse_id" class="form-select" onchange="this.form.submit()">
                 <option value="">-- Tất cả kho --</option>
                 {% for w in warehouses %}
-                    <option value="{{ w._id }}" {{ selectedWarehouse == w._id ? 'selected' : '' }}>{{ w.name }}</option>
+                    <option value="{{ w.id }}" {{ selectedWarehouse == w.id ? 'selected' : '' }}>{{ w.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -29,7 +29,7 @@
         <tbody>
         {% for it in items %}
             <tr class="{{ it.quantity <= it.min_stock ? 'table-danger' : '' }}">
-                <td>{{ it.name }}</td>
+                <td><a href="/items/{{ it.id }}" class="text-decoration-none fw-semibold">{{ it.name }}</a></td>
                 <td>{{ it.sku }}</td>
                 <td>{{ warehouseMap[it.warehouse_id] ?? '—' }}</td>
                 <td>{{ it.quantity }}</td>
@@ -37,8 +37,9 @@
                 <td>{{ it.min_stock }}</td>
                 <td>{{ it.price|number_format(0, ',', '.') }} đ</td>
                 <td class="text-end">
-                    <a href="/items/{{ it._id }}/edit" class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <form action="/items/{{ it._id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Xoá vật dụng này?');">
+                    <a href="/items/{{ it.id }}" class="btn btn-sm btn-outline-secondary">Xem</a>
+                    <a href="/items/{{ it.id }}/edit" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <form action="/items/{{ it.id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Xoá vật dụng này?');">
                         <button class="btn btn-sm btn-outline-danger">Xoá</button>
                     </form>
                 </td>

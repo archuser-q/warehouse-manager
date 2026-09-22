@@ -52,7 +52,7 @@
                 <tbody>
                 {% for it in lowStockItems %}
                     <tr>
-                        <td>{{ it.name }}</td>
+                        <td><a href="/items/{{ it.id }}" class="text-decoration-none">{{ it.name }}</a></td>
                         <td><span class="badge bg-danger">{{ it.quantity }}</span></td>
                         <td>{{ it.min_stock }}</td>
                     </tr>
@@ -83,7 +83,16 @@ new Chart(ctx, {
     options: {
         responsive: true,
         plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
+        scales: {
+            y: { beginAtZero: true },
+            x: {
+                ticks: {
+                    minRotation: 90,
+                    maxRotation: 90,
+                    autoSkip: false
+                }
+            }
+        }
     }
 });
 </script>

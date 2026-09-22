@@ -3,7 +3,7 @@
 {% block content %}
 <h3 class="mb-3">{{ item ? 'Sửa vật dụng' : 'Thêm vật dụng mới' }}</h3>
 <div class="card p-4" style="max-width: 650px;">
-    <form method="post" action="{{ item ? '/items/' ~ item._id : '/items' }}">
+    <form method="post" action="{{ item ? '/items/' ~ item.id : '/items' }}">
         <div class="row">
             <div class="col-md-8 mb-3">
                 <label class="form-label">Tên vật dụng</label>
@@ -19,7 +19,7 @@
             <select name="warehouse_id" class="form-select" required>
                 <option value="">-- Chọn kho --</option>
                 {% for w in warehouses %}
-                    <option value="{{ w._id }}" {{ item and item.warehouse_id == w._id ? 'selected' : '' }}>{{ w.name }}</option>
+                    <option value="{{ w.id }}" {{ item and item.warehouse_id == w.id ? 'selected' : '' }}>{{ w.name }}</option>
                 {% endfor %}
             </select>
         </div>

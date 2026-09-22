@@ -44,9 +44,9 @@
     <div class="sidebar" style="width: 240px;">
         <div class="brand"><i class="fa-solid fa-warehouse"></i> Kho Vật Tư</div>
         <nav>
-            <a href="/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
-            <a href="/warehouses"><i class="fa-solid fa-building me-2"></i>Nhà kho</a>
-            <a href="/items"><i class="fa-solid fa-boxes-stacked me-2"></i>Vật dụng</a>
+            <a href="/dashboard" class="{{ (currentPath == '/' or currentPath == '/dashboard') ? 'active' : '' }}"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+            <a href="/warehouses" class="{{ currentPath starts with '/warehouses' ? 'active' : '' }}"><i class="fa-solid fa-building me-2"></i>Nhà kho</a>
+            <a href="/items" class="{{ currentPath starts with '/items' ? 'active' : '' }}"><i class="fa-solid fa-boxes-stacked me-2"></i>Vật dụng</a>
         </nav>
     </div>
     <div class="flex-fill p-4">

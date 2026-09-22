@@ -3,7 +3,7 @@
 {% block content %}
 <h3 class="mb-3">{{ warehouse ? 'Sửa nhà kho' : 'Thêm nhà kho mới' }}</h3>
 <div class="card p-4" style="max-width: 600px;">
-    <form method="post" action="{{ warehouse ? '/warehouses/' ~ warehouse._id : '/warehouses' }}">
+    <form method="post" action="{{ warehouse ? '/warehouses/' ~ warehouse.id : '/warehouses' }}">
         <div class="mb-3">
             <label class="form-label">Tên kho</label>
             <input type="text" name="name" class="form-control" required value="{{ warehouse ? warehouse.name : '' }}">

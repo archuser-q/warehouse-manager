@@ -1,0 +1,55 @@
+{% extends "layout.twig" %}
+{% block title %}{{ item.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <a href="/items" class="text-muted text-decoration-none small"><i class="fa-solid fa-arrow-left me-1"></i>Danh sách vật dụng</a>
+        <h3 class="mb-0">{{ item.name }}</h3>
+    </div>
+    <div>
+        <a href="/items/{{ item.id }}/edit" class="btn btn-outline-primary"><i class="fa-solid fa-pen"></i> Sửa</a>
+        <form action="/items/{{ item.id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Xoá vật dụng này?');">
+            <button class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i> Xoá</button>
+        </form>
+    </div>
+</div>
+
+{% if item.quantity <= item.min_stock %}
+<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> Vật dụng này đang ở mức tồn kho thấp hoặc dưới ngưỡng cảnh báo.</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card p-3">
+            <h6 class="mb-3">Thông tin chi tiết</h6>
+            <table class="table table-sm table-borderless mb-0">
+                <tr><th style="width:180px;">SKU / Mã</th><td>{{ item.sku ?: '—' }}</td></tr>
+                <tr>
+                    <th>Thuộc kho</th>
+                    <td>
+                        {% if warehouse %}
+                            <a href="/warehouses/{{ warehouse.id }}">{{ warehouse.name }}</a>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr><th>Số lượng tồn</th><td>{{ item.quantity }} {{ item.unit }}</td></tr>
+                <tr><th>Ngưỡng tối thiểu</th><td>{{ item.min_stock }} {{ item.unit }}</td></tr>
+                <tr><th>Đơn giá</th><td>{{ item.price|number_format(0, ',', '.') }} đ</td></tr>
+                <tr><th>Thành tiền (tồn kho)</th><td>{{ (item.price * item.quantity)|number_format(0, ',', '.') }} đ</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card p-3 mb-3" style="background: linear-gradient(135deg,#1cc88a,#17a673);">
+            <div class="small">Số lượng tồn</div>
+            <div class="fs-2 fw-bold">{{ item.quantity }}</div>
+        </div>
+        <div class="card stat-card p-3" style="background: linear-gradient(135deg,#36b9cc,#2a96a5);">
+            <div class="small">Ngưỡng tối thiểu</div>
+            <div class="fs-2 fw-bold">{{ item.min_stock }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

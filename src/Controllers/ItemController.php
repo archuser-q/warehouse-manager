@@ -32,6 +32,24 @@ class ItemController
         ]);
     }
 
+    public function show(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) ($args['id'] ?? 0);
+        $item = Item::find($id);
+
+        if (!$item) {
+            return $response->withHeader('Location', '/items')->withStatus(302);
+        }
+
+        $warehouse = !empty($item['warehouse_id']) ? Warehouse::find((int) $item['warehouse_id']) : null;
+
+        $view = Twig::fromRequest($request);
+        return $view->render($response, 'items/show.twig', [
+            'item'      => $item,
+            'warehouse' => $warehouse,
+        ]);
+    }
+
     public function createForm(Request $request, Response $response): Response
     {
         $warehouses = Warehouse::all();

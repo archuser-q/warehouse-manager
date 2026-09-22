@@ -14,13 +14,13 @@
         <tbody>
         {% for w in warehouses %}
             <tr>
-                <td>{{ w.name }}</td>
+                <td><a href="/warehouses/{{ w.id }}" class="text-decoration-none fw-semibold">{{ w.name }}</a></td>
                 <td>{{ w.location }}</td>
                 <td>{{ w.description }}</td>
                 <td class="text-end">
-                    <a href="/items?warehouse_id={{ w._id }}" class="btn btn-sm btn-outline-secondary">Xem vật dụng</a>
-                    <a href="/warehouses/{{ w._id }}/edit" class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <form action="/warehouses/{{ w._id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Xoá kho này và toàn bộ vật dụng trong kho?');">
+                    <a href="/warehouses/{{ w.id }}" class="btn btn-sm btn-outline-secondary">Xem</a>
+                    <a href="/warehouses/{{ w.id }}/edit" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <form action="/warehouses/{{ w.id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Xoá kho này và toàn bộ vật dụng trong kho?');">
                         <button class="btn btn-sm btn-outline-danger">Xoá</button>
                     </form>
                 </td>

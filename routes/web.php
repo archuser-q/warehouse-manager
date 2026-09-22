@@ -12,6 +12,7 @@ return function (\Slim\App $app) {
     $app->get('/warehouses', [WarehouseController::class, 'index']);
     $app->get('/warehouses/create', [WarehouseController::class, 'createForm']);
     $app->post('/warehouses', [WarehouseController::class, 'store']);
+    $app->get('/warehouses/{id}', [WarehouseController::class, 'show']);
     $app->get('/warehouses/{id}/edit', [WarehouseController::class, 'editForm']);
     $app->post('/warehouses/{id}', [WarehouseController::class, 'update']);
     $app->post('/warehouses/{id}/delete', [WarehouseController::class, 'delete']);
@@ -20,6 +21,7 @@ return function (\Slim\App $app) {
     $app->get('/items', [ItemController::class, 'index']);
     $app->get('/items/create', [ItemController::class, 'createForm']);
     $app->post('/items', [ItemController::class, 'store']);
+    $app->get('/items/{id}', [ItemController::class, 'show']);
     $app->get('/items/{id}/edit', [ItemController::class, 'editForm']);
     $app->post('/items/{id}', [ItemController::class, 'update']);
     $app->post('/items/{id}/delete', [ItemController::class, 'delete']);

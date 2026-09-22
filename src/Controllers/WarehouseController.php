@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Warehouse;
+use App\Models\Item;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
@@ -15,6 +16,31 @@ class WarehouseController
         $view = Twig::fromRequest($request);
         return $view->render($response, 'warehouses/list.twig', [
             'warehouses' => $warehouses,
+        ]);
+    }
+
+    public function show(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) ($args['id'] ?? 0);
+        $warehouse = Warehouse::find($id);
+
+        if (!$warehouse) {
+            return $response->withHeader('Location', '/warehouses')->withStatus(302);
+        }
+
+        $items = Item::all($id);
+
+        $totalQuantity = 0;
+        foreach ($items as $it) {
+            $totalQuantity += (int) $it['quantity'];
+        }
+
+        $view = Twig::fromRequest($request);
+        return $view->render($response, 'warehouses/show.twig', [
+            'warehouse'     => $warehouse,
+            'items'         => $items,
+            'totalItems'    => count($items),
+            'totalQuantity' => $totalQuantity,
         ]);
     }
 

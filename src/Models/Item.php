@@ -44,13 +44,15 @@ class Item
     {
         $db = Database::getInstance();
 
-        $sql = "INSERT INTO items (warehouse_id, name, quantity, min_stock, price, created_at, updated_at)
-                VALUES (:warehouse_id, :name, :quantity, :min_stock, :price, NOW(), NOW())";
+        $sql = "INSERT INTO items (warehouse_id, name, sku, unit, quantity, min_stock, price, created_at, updated_at)
+                VALUES (:warehouse_id, :name, :sku, :unit, :quantity, :min_stock, :price, NOW(), NOW())";
 
         $stmt = $db->prepare($sql);
         $stmt->execute([
             'warehouse_id' => (int) ($data['warehouse_id'] ?? 0),
             'name'         => $data['name'] ?? '',
+            'sku'          => $data['sku'] ?? '',
+            'unit'         => $data['unit'] ?? '',
             'quantity'     => (int) ($data['quantity'] ?? 0),
             'min_stock'    => (int) ($data['min_stock'] ?? 0),
             'price'        => (float) ($data['price'] ?? 0.0),
@@ -70,7 +72,7 @@ class Item
         $fields = [];
         $params = ['id' => $id];
 
-        $allowedFields = ['warehouse_id', 'name', 'quantity', 'min_stock', 'price'];
+        $allowedFields = ['warehouse_id', 'name', 'sku', 'unit', 'quantity', 'min_stock', 'price'];
 
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $data)) {

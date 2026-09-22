@@ -28,6 +28,12 @@ $errorMiddleware = $app->addErrorMiddleware(
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
 $app->add(TwigMiddleware::create($app, $twig));
 
+// Truyền đường dẫn hiện tại vào Twig để làm nổi bật mục đang chọn trên sidebar
+$app->add(function ($request, $handler) use ($twig) {
+    $twig->getEnvironment()->addGlobal('currentPath', $request->getUri()->getPath());
+    return $handler->handle($request);
+});
+
 // Nạp routes
 (require __DIR__ . '/../routes/web.php')($app);
 
