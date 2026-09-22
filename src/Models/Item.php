@@ -7,26 +7,36 @@ use PDO;
 
 class Item
 {
-    /**
-     * Lấy danh sách tất cả vật dụng (có hỗ trợ lọc theo nhà kho)
-     */
-    public static function all(?int $warehouseId = null): array
+    public static function all(?int $warehouseId = null, ?string $search = null): array
     {
         $db = Database::getInstance();
 
+        $conditions = [];
+        $params = [];
+
         if ($warehouseId !== null) {
-            $stmt = $db->prepare("SELECT * FROM items WHERE warehouse_id = :warehouse_id ORDER BY name ASC");
-            $stmt->execute(['warehouse_id' => $warehouseId]);
-        } else {
-            $stmt = $db->query("SELECT * FROM items ORDER BY name ASC");
+            $conditions[] = "warehouse_id = :warehouse_id";
+            $params['warehouse_id'] = $warehouseId;
         }
+
+        $search = trim((string) $search);
+        if ($search !== '') {
+            $conditions[] = "(name ILIKE :search OR sku ILIKE :search)";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $sql = "SELECT * FROM items";
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+        $sql .= " ORDER BY name ASC";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->fetchAll();
     }
 
-    /**
-     * Tìm thông tin một vật dụng theo ID
-     */
     public static function find(int $id): ?array
     {
         $db = Database::getInstance();
@@ -37,9 +47,6 @@ class Item
         return $result ?: null;
     }
 
-    /**
-     * Thêm mới một vật dụng
-     */
     public static function create(array $data): int
     {
         $db = Database::getInstance();
@@ -61,14 +68,10 @@ class Item
         return (int) $db->lastInsertId();
     }
 
-    /**
-     * Cập nhật thông tin vật dụng theo ID
-     */
     public static function update(int $id, array $data): void
     {
         $db = Database::getInstance();
 
-        // Xây dựng câu truy vấn UPDATE động dựa trên dữ liệu truyền vào
         $fields = [];
         $params = ['id' => $id];
 
@@ -98,9 +101,6 @@ class Item
         $stmt->execute($params);
     }
 
-    /**
-     * Xóa một vật dụng theo ID
-     */
     public static function delete(int $id): void
     {
         $db = Database::getInstance();
@@ -108,9 +108,6 @@ class Item
         $stmt->execute(['id' => $id]);
     }
 
-    /**
-     * Đếm tổng số loại vật dụng
-     */
     public static function count(): int
     {
         $db = Database::getInstance();
@@ -118,9 +115,6 @@ class Item
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Tính tổng số lượng tất cả vật dụng trong kho
-     */
     public static function totalQuantity(): int
     {
         $db = Database::getInstance();
@@ -128,9 +122,6 @@ class Item
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Lấy danh sách các vật dụng chạm hoặc dưới ngưỡng cảnh báo (quantity <= min_stock)
-     */
     public static function lowStock(): array
     {
         $db = Database::getInstance();
@@ -138,9 +129,6 @@ class Item
         return $stmt->fetchAll();
     }
 
-    /**
-     * Thống kê tổng số loại mặt hàng và tổng số lượng tồn kho theo từng nhà kho
-     */
     public static function countByWarehouse(): array
     {
         $db = Database::getInstance();

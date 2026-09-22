@@ -12,10 +12,14 @@ class WarehouseController
 {
     public function index(Request $request, Response $response): Response
     {
-        $warehouses = Warehouse::all();
+        $params = $request->getQueryParams();
+        $search = trim((string) ($params['q'] ?? ''));
+
+        $warehouses = Warehouse::all($search !== '' ? $search : null);
         $view = Twig::fromRequest($request);
         return $view->render($response, 'warehouses/list.twig', [
             'warehouses' => $warehouses,
+            'search' => $search,
         ]);
     }
 
@@ -92,9 +96,6 @@ class WarehouseController
     public function delete(Request $request, Response $response, array $args): Response
     {
         $id = (int) ($args['id'] ?? 0);
-        
-        // Phương thức Warehouse::delete() trong Model đã tự xử lý Transaction 
-        // để xóa sạch các items thuộc nhà kho này trước khi xóa nhà kho.
         Warehouse::delete($id);
 
         return $response->withHeader('Location', '/warehouses')->withStatus(302);

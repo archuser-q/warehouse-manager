@@ -14,8 +14,9 @@ class ItemController
     {
         $params = $request->getQueryParams();
         $warehouseId = !empty($params['warehouse_id']) ? (int) $params['warehouse_id'] : null;
+        $search = trim((string) ($params['q'] ?? ''));
 
-        $items = Item::all($warehouseId);
+        $items = Item::all($warehouseId, $search !== '' ? $search : null);
         $warehouses = Warehouse::all();
         
         $warehouseMap = [];
@@ -29,6 +30,7 @@ class ItemController
             'warehouses' => $warehouses,
             'warehouseMap' => $warehouseMap,
             'selectedWarehouse' => $warehouseId,
+            'search' => $search,
         ]);
     }
 

@@ -9,12 +9,21 @@
 <div class="card p-3 mb-3">
     <form method="get" class="row g-2">
         <div class="col-auto">
+            <input type="text" name="q" class="form-control" placeholder="Tìm theo tên hoặc SKU..." value="{{ search }}">
+        </div>
+        <div class="col-auto">
             <select name="warehouse_id" class="form-select" onchange="this.form.submit()">
                 <option value="">-- Tất cả kho --</option>
                 {% for w in warehouses %}
                     <option value="{{ w.id }}" {{ selectedWarehouse == w.id ? 'selected' : '' }}>{{ w.name }}</option>
                 {% endfor %}
             </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Tìm</button>
+            {% if search or selectedWarehouse %}
+                <a href="/items" class="btn btn-outline-secondary">Xoá lọc</a>
+            {% endif %}
         </div>
     </form>
 </div>
