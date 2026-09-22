@@ -1,0 +1,23 @@
+{% extends "layout.twig" %}
+{% block title %}{{ warehouse ? 'Sửa kho' : 'Thêm kho' }}{% endblock %}
+{% block content %}
+<h3 class="mb-3">{{ warehouse ? 'Sửa nhà kho' : 'Thêm nhà kho mới' }}</h3>
+<div class="card p-4" style="max-width: 600px;">
+    <form method="post" action="{{ warehouse ? '/warehouses/' ~ warehouse._id : '/warehouses' }}">
+        <div class="mb-3">
+            <label class="form-label">Tên kho</label>
+            <input type="text" name="name" class="form-control" required value="{{ warehouse ? warehouse.name : '' }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Vị trí</label>
+            <input type="text" name="location" class="form-control" value="{{ warehouse ? warehouse.location : '' }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea name="description" class="form-control" rows="3">{{ warehouse ? warehouse.description : '' }}</textarea>
+        </div>
+        <button class="btn btn-primary">Lưu</button>
+        <a href="/warehouses" class="btn btn-light">Huỷ</a>
+    </form>
+</div>
+{% endblock %}

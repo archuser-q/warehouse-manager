@@ -1,0 +1,52 @@
+{% extends "layout.twig" %}
+{% block title %}Vật dụng{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Danh sách vật dụng</h3>
+    <a href="/items/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Thêm vật dụng</a>
+</div>
+
+<div class="card p-3 mb-3">
+    <form method="get" class="row g-2">
+        <div class="col-auto">
+            <select name="warehouse_id" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Tất cả kho --</option>
+                {% for w in warehouses %}
+                    <option value="{{ w._id }}" {{ selectedWarehouse == w._id ? 'selected' : '' }}>{{ w.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="card p-3">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Tên vật dụng</th><th>SKU</th><th>Kho</th><th>Số lượng</th><th>Đơn vị</th><th>Ngưỡng tối thiểu</th><th>Đơn giá</th><th class="text-end">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for it in items %}
+            <tr class="{{ it.quantity <= it.min_stock ? 'table-danger' : '' }}">
+                <td>{{ it.name }}</td>
+                <td>{{ it.sku }}</td>
+                <td>{{ warehouseMap[it.warehouse_id] ?? '—' }}</td>
+                <td>{{ it.quantity }}</td>
+                <td>{{ it.unit }}</td>
+                <td>{{ it.min_stock }}</td>
+                <td>{{ it.price|number_format(0, ',', '.') }} đ</td>
+                <td class="text-end">
+                    <a href="/items/{{ it._id }}/edit" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <form action="/items/{{ it._id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Xoá vật dụng này?');">
+                        <button class="btn btn-sm btn-outline-danger">Xoá</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="text-center text-muted">Chưa có vật dụng nào.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

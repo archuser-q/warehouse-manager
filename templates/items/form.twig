@@ -1,0 +1,48 @@
+{% extends "layout.twig" %}
+{% block title %}{{ item ? 'Sửa vật dụng' : 'Thêm vật dụng' }}{% endblock %}
+{% block content %}
+<h3 class="mb-3">{{ item ? 'Sửa vật dụng' : 'Thêm vật dụng mới' }}</h3>
+<div class="card p-4" style="max-width: 650px;">
+    <form method="post" action="{{ item ? '/items/' ~ item._id : '/items' }}">
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <label class="form-label">Tên vật dụng</label>
+                <input type="text" name="name" class="form-control" required value="{{ item ? item.name : '' }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">SKU / Mã</label>
+                <input type="text" name="sku" class="form-control" value="{{ item ? item.sku : '' }}">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Thuộc kho</label>
+            <select name="warehouse_id" class="form-select" required>
+                <option value="">-- Chọn kho --</option>
+                {% for w in warehouses %}
+                    <option value="{{ w._id }}" {{ item and item.warehouse_id == w._id ? 'selected' : '' }}>{{ w.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Số lượng</label>
+                <input type="number" name="quantity" class="form-control" value="{{ item ? item.quantity : 0 }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Đơn vị tính</label>
+                <input type="text" name="unit" class="form-control" placeholder="cái, hộp, kg..." value="{{ item ? item.unit : '' }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Ngưỡng tối thiểu</label>
+                <input type="number" name="min_stock" class="form-control" value="{{ item ? item.min_stock : 0 }}">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Đơn giá (VNĐ)</label>
+            <input type="number" step="0.01" name="price" class="form-control" value="{{ item ? item.price : 0 }}">
+        </div>
+        <button class="btn btn-primary">Lưu</button>
+        <a href="/items" class="btn btn-light">Huỷ</a>
+    </form>
+</div>
+{% endblock %}
