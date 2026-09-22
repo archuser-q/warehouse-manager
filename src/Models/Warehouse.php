@@ -7,21 +7,48 @@ use PDO;
 
 class Warehouse
 {
-    public static function all(?string $search = null): array
+    public static function all(?string $search = null, int $page = 1, int $perPage = 5): array
     {
         $db = Database::getInstance();
 
-        $search = trim((string) $search);
-        if ($search !== '') {
-            $stmt = $db->prepare(
-                "SELECT * FROM warehouses WHERE name ILIKE :search OR location ILIKE :search ORDER BY name ASC"
-            );
-            $stmt->execute(['search' => '%' . $search . '%']);
-        } else {
-            $stmt = $db->query("SELECT * FROM warehouses ORDER BY name ASC");
+        [$where, $params] = self::buildFilter($search);
+
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = "SELECT * FROM warehouses{$where} ORDER BY name ASC LIMIT :limit OFFSET :offset";
+        $stmt = $db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(":{$key}", $value);
         }
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    public static function countFiltered(?string $search = null): int
+    {
+        $db = Database::getInstance();
+
+        [$where, $params] = self::buildFilter($search);
+
+        $stmt = $db->prepare("SELECT COUNT(*) FROM warehouses{$where}");
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    private static function buildFilter(?string $search): array
+    {
+        $search = trim((string) $search);
+        if ($search === '') {
+            return ['', []];
+        }
+
+        return [' WHERE name ILIKE :search OR location ILIKE :search', ['search' => '%' . $search . '%']];
     }
 
     public static function find(int $id): ?array
@@ -87,9 +114,11 @@ class Warehouse
         try {
             $db->beginTransaction();
 
+            // 1. Xóa tất cả các vật dụng thuộc nhà kho này
             $stmtItems = $db->prepare("DELETE FROM items WHERE warehouse_id = :warehouse_id");
             $stmtItems->execute(['warehouse_id' => $id]);
 
+            // 2. Xóa nhà kho
             $stmtWarehouse = $db->prepare("DELETE FROM warehouses WHERE id = :id");
             $stmtWarehouse->execute(['id' => $id]);
 
@@ -99,6 +128,7 @@ class Warehouse
             throw $e;
         }
     }
+
     public static function count(): int
     {
         $db = Database::getInstance();

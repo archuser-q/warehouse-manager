@@ -14,12 +14,19 @@ class WarehouseController
     {
         $params = $request->getQueryParams();
         $search = trim((string) ($params['q'] ?? ''));
+        $page = max(1, (int) ($params['page'] ?? 1));
+        $perPage = 5;
 
-        $warehouses = Warehouse::all($search !== '' ? $search : null);
+        $warehouses = Warehouse::all($search !== '' ? $search : null, $page, $perPage);
+        $total = Warehouse::countFiltered($search !== '' ? $search : null);
+        $totalPages = max(1, (int) ceil($total / $perPage));
+
         $view = Twig::fromRequest($request);
         return $view->render($response, 'warehouses/list.twig', [
             'warehouses' => $warehouses,
             'search' => $search,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 

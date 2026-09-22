@@ -15,8 +15,13 @@ class ItemController
         $params = $request->getQueryParams();
         $warehouseId = !empty($params['warehouse_id']) ? (int) $params['warehouse_id'] : null;
         $search = trim((string) ($params['q'] ?? ''));
+        $page = max(1, (int) ($params['page'] ?? 1));
+        $perPage = 5;
 
-        $items = Item::all($warehouseId, $search !== '' ? $search : null);
+        $items = Item::all($warehouseId, $search !== '' ? $search : null, $page, $perPage);
+        $total = Item::countFiltered($warehouseId, $search !== '' ? $search : null);
+        $totalPages = max(1, (int) ceil($total / $perPage));
+
         $warehouses = Warehouse::all();
         
         $warehouseMap = [];
@@ -31,6 +36,8 @@ class ItemController
             'warehouseMap' => $warehouseMap,
             'selectedWarehouse' => $warehouseId,
             'search' => $search,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 

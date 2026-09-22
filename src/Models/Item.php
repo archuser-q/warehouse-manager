@@ -7,10 +7,42 @@ use PDO;
 
 class Item
 {
-    public static function all(?int $warehouseId = null, ?string $search = null): array
+    public static function all(?int $warehouseId = null, ?string $search = null, int $page = 1, int $perPage = 5): array
     {
         $db = Database::getInstance();
 
+        [$where, $params] = self::buildFilter($warehouseId, $search);
+
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = "SELECT * FROM items{$where} ORDER BY name ASC LIMIT :limit OFFSET :offset";
+        $stmt = $db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(":{$key}", $value);
+        }
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public static function countFiltered(?int $warehouseId = null, ?string $search = null): int
+    {
+        $db = Database::getInstance();
+
+        [$where, $params] = self::buildFilter($warehouseId, $search);
+
+        $stmt = $db->prepare("SELECT COUNT(*) FROM items{$where}");
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    private static function buildFilter(?int $warehouseId, ?string $search): array
+    {
         $conditions = [];
         $params = [];
 
@@ -25,16 +57,9 @@ class Item
             $params['search'] = '%' . $search . '%';
         }
 
-        $sql = "SELECT * FROM items";
-        if (!empty($conditions)) {
-            $sql .= " WHERE " . implode(' AND ', $conditions);
-        }
-        $sql .= " ORDER BY name ASC";
+        $where = !empty($conditions) ? " WHERE " . implode(' AND ', $conditions) : '';
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-
-        return $stmt->fetchAll();
+        return [$where, $params];
     }
 
     public static function find(int $id): ?array
