@@ -1,0 +1,22 @@
+{% extends "layout.twig" %}
+{% block title %}Nhập hàng - {{ item.name }}{% endblock %}
+{% block content %}
+<a href="/items/{{ item.id }}" class="text-muted text-decoration-none small"><i class="fa-solid fa-arrow-left me-1"></i>{{ item.name }}</a>
+<h3 class="mb-3 mt-1">Nhập hàng: {{ item.name }}</h3>
+
+<div class="card p-4" style="max-width: 500px;">
+    <p class="text-muted">Tồn kho hiện tại: <strong>{{ item.quantity }} {{ item.unit }}</strong></p>
+    <form method="post" action="/items/{{ item.id }}/receive">
+        <div class="mb-3">
+            <label class="form-label">Số lượng nhập thêm</label>
+            <input type="number" name="quantity" min="1" class="form-control" required autofocus>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Ghi chú (không bắt buộc)</label>
+            <input type="text" name="note" class="form-control" placeholder="VD: Nhập từ nhà cung cấp A">
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Xác nhận nhập hàng</button>
+        <a href="/items/{{ item.id }}" class="btn btn-light">Huỷ</a>
+    </form>
+</div>
+{% endblock %}
