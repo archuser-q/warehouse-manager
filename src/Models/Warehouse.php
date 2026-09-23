@@ -142,4 +142,13 @@ class Warehouse
         $stmt = $db->query("SELECT COUNT(*) FROM warehouses");
         return (int) $stmt->fetchColumn();
     }
+
+    public static function recent(int $limit = 5): array
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM warehouses ORDER BY created_at DESC LIMIT :limit");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

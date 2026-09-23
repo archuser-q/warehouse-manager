@@ -175,4 +175,13 @@ class Item
         $stmt = $db->query($sql);
         return $stmt->fetchAll();
     }
+
+    public static function recent(int $limit = 5): array
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM items ORDER BY created_at DESC LIMIT :limit");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

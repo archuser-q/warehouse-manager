@@ -3,65 +3,143 @@
 {% block content %}
 <h3 class="mb-4">Tổng quan kho hàng</h3>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card p-3" style="background: linear-gradient(135deg,#4e73df,#3a5ecf);">
-            <div class="small">Số nhà kho</div>
-            <div class="fs-2 fw-bold">{{ totalWarehouses }}</div>
-            <i class="fa-solid fa-building position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+<ul class="nav nav-tabs mb-3" id="dashboardTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview-pane" type="button" role="tab">Tổng quan</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity-pane" type="button" role="tab">Lịch sử hoạt động</button>
+    </li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="overview-pane" role="tabpanel">
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card p-3" style="background: linear-gradient(135deg,#4e73df,#3a5ecf);">
+                <div class="small">Số nhà kho</div>
+                <div class="fs-2 fw-bold">{{ totalWarehouses }}</div>
+                <i class="fa-solid fa-building position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card p-3" style="background: linear-gradient(135deg,#1cc88a,#17a673);">
+                <div class="small">Loại vật dụng</div>
+                <div class="fs-2 fw-bold">{{ totalItems }}</div>
+                <i class="fa-solid fa-boxes-stacked position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card p-3" style="background: linear-gradient(135deg,#36b9cc,#2a96a5);">
+                <div class="small">Tổng số lượng tồn</div>
+                <div class="fs-2 fw-bold">{{ totalQuantity }}</div>
+                <i class="fa-solid fa-cubes position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card p-3" style="background: linear-gradient(135deg,#e74a3b,#c8392a);">
+                <div class="small">Vật dụng sắp hết</div>
+                <div class="fs-2 fw-bold">{{ lowStockItems|length }}</div>
+                <i class="fa-solid fa-triangle-exclamation position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card p-3" style="background: linear-gradient(135deg,#1cc88a,#17a673);">
-            <div class="small">Loại vật dụng</div>
-            <div class="fs-2 fw-bold">{{ totalItems }}</div>
-            <i class="fa-solid fa-boxes-stacked position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-7">
+            <div class="card p-3">
+                <h6 class="mb-3">Số lượng vật dụng theo từng kho</h6>
+                <canvas id="warehouseChart" height="120"></canvas>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card p-3">
+                <h6 class="mb-3 text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo sắp hết hàng</h6>
+                {% if lowStockItems|length == 0 %}
+                    <p class="text-muted mb-0">Không có vật dụng nào sắp hết.</p>
+                {% else %}
+                <table class="table table-sm">
+                    <thead><tr><th>Tên</th><th>Tồn</th><th>Ngưỡng</th></tr></thead>
+                    <tbody>
+                    {% for it in lowStockItems %}
+                        <tr>
+                            <td><a href="/items/{{ it.id }}" class="text-decoration-none">{{ it.name }}</a></td>
+                            <td><span class="badge bg-danger">{{ it.quantity }}</span></td>
+                            <td>{{ it.min_stock }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card p-3" style="background: linear-gradient(135deg,#36b9cc,#2a96a5);">
-            <div class="small">Tổng số lượng tồn</div>
-            <div class="fs-2 fw-bold">{{ totalQuantity }}</div>
-            <i class="fa-solid fa-cubes position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
+
+    <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left"></i> Hoạt động gần đây</h6>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="tab" data-bs-target="#activity-pane">
+                Xem toàn bộ lịch sử <i class="fa-solid fa-arrow-right ms-1"></i>
+            </button>
         </div>
+        {% if recentActivity|length == 0 %}
+            <p class="text-muted mb-0">Chưa có hoạt động nào.</p>
+        {% else %}
+        <table class="table table-sm align-middle mb-0">
+            <tbody>
+            {% for a in recentActivity %}
+                <tr>
+                    <td style="width:36px;">
+                        {% if a.type == 'item' %}
+                            <span class="badge bg-success"><i class="fa-solid fa-box"></i></span>
+                        {% else %}
+                            <span class="badge bg-primary"><i class="fa-solid fa-building"></i></span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ a.url }}" class="text-decoration-none fw-semibold">{{ a.name }}</a>
+                        <div class="small text-muted">{{ a.type == 'item' ? 'Vật dụng mới · ' ~ a.meta : 'Nhà kho mới · ' ~ a.meta }}</div>
+                    </td>
+                    <td class="text-end text-muted small">{{ a.created_at|date('d/m/Y H:i') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card p-3" style="background: linear-gradient(135deg,#e74a3b,#c8392a);">
-            <div class="small">Vật dụng sắp hết</div>
-            <div class="fs-2 fw-bold">{{ lowStockItems|length }}</div>
-            <i class="fa-solid fa-triangle-exclamation position-absolute top-0 end-0 m-3 opacity-50 fs-3"></i>
-        </div>
+
+</div>
+
+<div class="tab-pane fade" id="activity-pane" role="tabpanel">
+    <div class="card p-3">
+        <h6 class="mb-3">Toàn bộ lịch sử hoạt động gần đây</h6>
+        {% if recentActivityFull|length == 0 %}
+            <p class="text-muted mb-0">Chưa có hoạt động nào.</p>
+        {% else %}
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th></th><th>Nội dung</th><th>Loại</th><th class="text-end">Thời gian</th></tr></thead>
+            <tbody>
+            {% for a in recentActivityFull %}
+                <tr>
+                    <td style="width:36px;">
+                        {% if a.type == 'item' %}
+                            <span class="badge bg-success"><i class="fa-solid fa-box"></i></span>
+                        {% else %}
+                            <span class="badge bg-primary"><i class="fa-solid fa-building"></i></span>
+                        {% endif %}
+                    </td>
+                    <td><a href="{{ a.url }}" class="text-decoration-none fw-semibold">{{ a.name }}</a><div class="small text-muted">{{ a.meta }}</div></td>
+                    <td>{{ a.type == 'item' ? 'Vật dụng' : 'Nhà kho' }}</td>
+                    <td class="text-end text-muted small">{{ a.created_at|date('d/m/Y H:i') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-md-7">
-        <div class="card p-3">
-            <h6 class="mb-3">Số lượng vật dụng theo từng kho</h6>
-            <canvas id="warehouseChart" height="120"></canvas>
-        </div>
-    </div>
-    <div class="col-md-5">
-        <div class="card p-3">
-            <h6 class="mb-3 text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo sắp hết hàng</h6>
-            {% if lowStockItems|length == 0 %}
-                <p class="text-muted mb-0">Không có vật dụng nào sắp hết.</p>
-            {% else %}
-            <table class="table table-sm">
-                <thead><tr><th>Tên</th><th>Tồn</th><th>Ngưỡng</th></tr></thead>
-                <tbody>
-                {% for it in lowStockItems %}
-                    <tr>
-                        <td><a href="/items/{{ it.id }}" class="text-decoration-none">{{ it.name }}</a></td>
-                        <td><span class="badge bg-danger">{{ it.quantity }}</span></td>
-                        <td>{{ it.min_stock }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-        </div>
-    </div>
 </div>
 {% endblock %}
 
