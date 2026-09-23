@@ -7,6 +7,7 @@ use App\Models\Item;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
+use App\Models\StockMovement;
 
 class DashboardController
 {
@@ -41,6 +42,7 @@ class DashboardController
             'chartQuantities'    => $chartQuantities,
             'recentActivity'     => array_slice($recentActivityFull, 0, 5),
             'recentActivityFull' => $recentActivityFull,
+            'stockMovements' => StockMovement::recent(50),
         ];
 
         $view = Twig::fromRequest($request);

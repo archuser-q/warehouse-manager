@@ -25,4 +25,8 @@ return function (\Slim\App $app) {
     $app->get('/items/{id}/edit', [ItemController::class, 'editForm']);
     $app->post('/items/{id}', [ItemController::class, 'update']);
     $app->post('/items/{id}/delete', [ItemController::class, 'delete']);
+
+    // History (Lịch sử)
+    $app->get('/items/{id}/receive', [ItemController::class, 'receiveForm']);
+    $app->post('/items/{id}/receive', [ItemController::class, 'receive']);
 };

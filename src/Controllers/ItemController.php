@@ -7,6 +7,7 @@ use App\Models\Warehouse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
+use App\Models\StockMovement;
 
 class ItemController
 {
@@ -72,15 +73,23 @@ class ItemController
     public function store(Request $request, Response $response): Response
     {
         $data = (array) $request->getParsedBody();
-        Item::create([
+        $warehouseId = !empty($data['warehouse_id']) ? (int) $data['warehouse_id'] : null;
+        $qty = (int) ($data['quantity'] ?? 0);
+
+        $id = Item::create([
             'name'         => trim($data['name'] ?? ''),
             'sku'          => trim($data['sku'] ?? ''),
             'unit'         => trim($data['unit'] ?? ''),
-            'quantity'     => (int) ($data['quantity'] ?? 0),
+            'quantity'     => $qty,
             'min_stock'    => (int) ($data['min_stock'] ?? 0),
             'price'        => (float) ($data['price'] ?? 0),
-            'warehouse_id' => !empty($data['warehouse_id']) ? (int) $data['warehouse_id'] : null,
+            'warehouse_id' => $warehouseId,
         ]);
+
+        if ($qty > 0) {
+            $warehouse = $warehouseId ? Warehouse::find($warehouseId) : null;
+            StockMovement::log($id, trim($data['name'] ?? ''), $warehouseId, $warehouse['name'] ?? null, $qty, 'Nhập ban đầu');
+        }
 
         return $response->withHeader('Location', '/items')->withStatus(302);
     }
@@ -122,5 +131,49 @@ class ItemController
         Item::delete($id);
 
         return $response->withHeader('Location', '/items')->withStatus(302);
+    }
+
+    public function receiveForm(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) ($args['id'] ?? 0);
+        $item = Item::find($id);
+
+        if (!$item) {
+            return $response->withHeader('Location', '/items')->withStatus(302);
+        }
+
+        $view = Twig::fromRequest($request);
+        return $view->render($response, 'items/receive.twig', ['item' => $item]);
+    }
+
+    public function receive(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) ($args['id'] ?? 0);
+        $item = Item::find($id);
+
+        if (!$item) {
+            return $response->withHeader('Location', '/items')->withStatus(302);
+        }
+
+        $data = (array) $request->getParsedBody();
+        $qty = (int) ($data['quantity'] ?? 0);
+        $note = trim($data['note'] ?? '');
+
+        if ($qty > 0) {
+            Item::update($id, ['quantity' => (int) $item['quantity'] + $qty]);
+
+            $warehouse = !empty($item['warehouse_id']) ? Warehouse::find((int) $item['warehouse_id']) : null;
+
+            StockMovement::log(
+                $id,
+                $item['name'],
+                $item['warehouse_id'] ?? null,
+                $warehouse['name'] ?? null,
+                $qty,
+                $note !== '' ? $note : null
+            );
+        }
+
+        return $response->withHeader('Location', '/items/' . $id)->withStatus(302);
     }
 }
