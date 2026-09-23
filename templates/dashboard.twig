@@ -81,15 +81,15 @@ new Chart(ctx, {
         }]
     },
     options: {
+        indexAxis: 'y',          // ← thêm dòng này để cột nằm ngang
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true },
-            x: {
+            x: { beginAtZero: true },   // ← đổi từ 'y' thành 'x' (trục số lượng giờ nằm ngang)
+            y: {
                 ticks: {
-                    minRotation: 90,
-                    maxRotation: 90,
                     autoSkip: false
+                    // bỏ minRotation/maxRotation vì nhãn kho giờ nằm ngang bên trái, không cần xoay
                 }
             }
         }

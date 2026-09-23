@@ -62,6 +62,14 @@ class Item
         return [$where, $params];
     }
 
+    public static function allByWarehouse(int $warehouseId): array
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM items WHERE warehouse_id = :warehouse_id ORDER BY name ASC");
+        $stmt->execute(['warehouse_id' => $warehouseId]);
+        return $stmt->fetchAll();
+    }
+
     public static function find(int $id): ?array
     {
         $db = Database::getInstance();

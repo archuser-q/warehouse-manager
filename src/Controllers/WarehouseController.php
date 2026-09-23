@@ -39,7 +39,7 @@ class WarehouseController
             return $response->withHeader('Location', '/warehouses')->withStatus(302);
         }
 
-        $items = Item::all($id);
+        $items = Item::allByWarehouse($id);
 
         $totalQuantity = 0;
         foreach ($items as $it) {

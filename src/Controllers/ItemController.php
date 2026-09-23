@@ -22,7 +22,7 @@ class ItemController
         $total = Item::countFiltered($warehouseId, $search !== '' ? $search : null);
         $totalPages = max(1, (int) ceil($total / $perPage));
 
-        $warehouses = Warehouse::all();
+        $warehouses = Warehouse::allUnpaginated();
         
         $warehouseMap = [];
         foreach ($warehouses as $w) {
@@ -61,7 +61,7 @@ class ItemController
 
     public function createForm(Request $request, Response $response): Response
     {
-        $warehouses = Warehouse::all();
+        $warehouses = Warehouse::allUnpaginated();
         $view = Twig::fromRequest($request);
         return $view->render($response, 'items/form.twig', [
             'item' => null,
@@ -89,7 +89,7 @@ class ItemController
     {
         $id = (int) ($args['id'] ?? 0);
         $item = Item::find($id);
-        $warehouses = Warehouse::all();
+        $warehouses = Warehouse::allUnpaginated();
 
         $view = Twig::fromRequest($request);
         return $view->render($response, 'items/form.twig', [

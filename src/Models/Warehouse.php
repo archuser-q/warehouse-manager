@@ -51,6 +51,13 @@ class Warehouse
         return [' WHERE name ILIKE :search OR location ILIKE :search', ['search' => '%' . $search . '%']];
     }
 
+    public static function allUnpaginated(): array
+    {
+        $db = Database::getInstance();
+        $stmt = $db->query("SELECT * FROM warehouses ORDER BY name ASC");
+        return $stmt->fetchAll();
+    }
+
     public static function find(int $id): ?array
     {
         $db = Database::getInstance();
