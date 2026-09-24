@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #999; padding: 5px 8px; text-align: left; }
+    th { background: #eee; }
+</style>
+</head>
+<body>
+    <h2>Danh sách vật dụng</h2>
+    <table>
+        <thead>
+            <tr><th>Tên vật dụng</th><th>SKU</th><th>Kho</th><th>Số lượng</th><th>Đơn vị</th><th>Ngưỡng tối thiểu</th><th>Đơn giá</th></tr>
+        </thead>
+        <tbody>
+        {% for it in items %}
+            <tr>
+                <td>{{ it.name }}</td>
+                <td>{{ it.sku }}</td>
+                <td>{{ warehouseMap[it.warehouse_id] ?? '' }}</td>
+                <td>{{ it.quantity }}</td>
+                <td>{{ it.unit }}</td>
+                <td>{{ it.min_stock }}</td>
+                <td>{{ it.price|number_format(0, ',', '.') }} đ</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
