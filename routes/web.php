@@ -20,6 +20,10 @@ return function (\Slim\App $app) {
     // Items (Vật dụng)
     $app->get('/items', [ItemController::class, 'index']);
     $app->get('/items/create', [ItemController::class, 'createForm']);
+    $app->get('/items/export/excel', [ItemController::class, 'exportExcel']);
+    $app->get('/items/export/pdf', [ItemController::class, 'exportPdf']);
+    $app->get('/items/import', [ItemController::class, 'importForm']);
+    $app->post('/items/import', [ItemController::class, 'importExcel']);
     $app->post('/items', [ItemController::class, 'store']);
     $app->get('/items/{id}', [ItemController::class, 'show']);
     $app->get('/items/{id}/edit', [ItemController::class, 'editForm']);

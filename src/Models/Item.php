@@ -70,6 +70,16 @@ class Item
         return $stmt->fetchAll();
     }
 
+    /*Used for exporting pdf/excel*/
+    public static function allUnpaginated(?int $warehouseId = null, ?string $search = null): array
+    {
+        $db = Database::getInstance();
+        [$where, $params] = self::buildFilter($warehouseId, $search);
+        $stmt = $db->prepare("SELECT * FROM items{$where} ORDER BY name ASC");
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
     public static function find(int $id): ?array
     {
         $db = Database::getInstance();

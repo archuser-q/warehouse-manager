@@ -9,6 +9,12 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 use App\Models\StockMovement;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 class ItemController
 {
     public function index(Request $request, Response $response): Response
@@ -30,6 +36,11 @@ class ItemController
             $warehouseMap[$w['id']] = $w['name'];
         }
 
+        $qs = http_build_query(array_filter([
+            'q' => $search !== '' ? $search : null,
+            'warehouse_id' => $warehouseId,
+        ]));
+
         $view = Twig::fromRequest($request);
         return $view->render($response, 'items/list.twig', [
             'items' => $items,
@@ -39,6 +50,8 @@ class ItemController
             'search' => $search,
             'page' => $page,
             'totalPages' => $totalPages,
+            'queryString' => $qs !== '' ? '?' . $qs : '',
+            'imported' => $params['imported'] ?? null,
         ]);
     }
 
@@ -175,5 +188,123 @@ class ItemController
         }
 
         return $response->withHeader('Location', '/items/' . $id)->withStatus(302);
+    }
+    public function exportExcel(Request $request, Response $response): Response
+    {
+        $params = $request->getQueryParams();
+        $warehouseId = !empty($params['warehouse_id']) ? (int) $params['warehouse_id'] : null;
+        $search = trim((string) ($params['q'] ?? ''));
+
+        $items = Item::allUnpaginated($warehouseId, $search !== '' ? $search : null);
+        $warehouseMap = [];
+        foreach (Warehouse::allUnpaginated() as $w) {
+            $warehouseMap[$w['id']] = $w['name'];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Vật dụng');
+
+        $sheet->fromArray(['Tên vật dụng', 'SKU', 'Kho', 'Số lượng', 'Đơn vị', 'Ngưỡng tối thiểu', 'Đơn giá'], null, 'A1');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($items as $it) {
+            $sheet->fromArray([
+                $it['name'], $it['sku'], $warehouseMap[$it['warehouse_id']] ?? '',
+                $it['quantity'], $it['unit'], $it['min_stock'], $it['price'],
+            ], null, "A{$row}");
+            $row++;
+        }
+        foreach (range('A', 'G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $stream = fopen('php://temp', 'r+');
+        (new Xlsx($spreadsheet))->save($stream);
+        rewind($stream);
+        $content = stream_get_contents($stream);
+        fclose($stream);
+
+        $response->getBody()->write($content);
+        return $response
+            ->withHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->withHeader('Content-Disposition', 'attachment; filename="vat-dung.xlsx"');
+    }
+
+    public function exportPdf(Request $request, Response $response): Response
+    {
+        $params = $request->getQueryParams();
+        $warehouseId = !empty($params['warehouse_id']) ? (int) $params['warehouse_id'] : null;
+        $search = trim((string) ($params['q'] ?? ''));
+
+        $items = Item::allUnpaginated($warehouseId, $search !== '' ? $search : null);
+        $warehouseMap = [];
+        foreach (Warehouse::allUnpaginated() as $w) {
+            $warehouseMap[$w['id']] = $w['name'];
+        }
+
+        $view = Twig::fromRequest($request);
+        $html = $view->fetch('items/export_pdf.twig', ['items' => $items, 'warehouseMap' => $warehouseMap]);
+
+        $options = new Options();
+        $options->set('isRemoteEnabled', false);
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $response->getBody()->write($dompdf->output());
+        return $response
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Disposition', 'attachment; filename="vat-dung.pdf"');
+    }
+
+    public function importForm(Request $request, Response $response): Response
+    {
+        $params = $request->getQueryParams();
+        $view = Twig::fromRequest($request);
+        return $view->render($response, 'items/import.twig', ['error' => isset($params['error'])]);
+    }
+
+    public function importExcel(Request $request, Response $response): Response
+    {
+        $file = $request->getUploadedFiles()['file'] ?? null;
+
+        if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
+            return $response->withHeader('Location', '/items/import?error=1')->withStatus(302);
+        }
+
+        $tmpPath = sys_get_temp_dir() . '/' . uniqid('import_') . '.xlsx';
+        $file->moveTo($tmpPath);
+
+        $warehouseByName = [];
+        foreach (Warehouse::allUnpaginated() as $w) {
+            $warehouseByName[mb_strtolower(trim($w['name']))] = $w['id'];
+        }
+
+        $rows = IOFactory::load($tmpPath)->getActiveSheet()->toArray();
+        @unlink($tmpPath);
+
+        $imported = 0;
+        foreach ($rows as $i => $row) {
+            if ($i === 0) continue; // bỏ dòng tiêu đề
+            [$name, $sku, $whName, $qty, $unit, $minStock, $price] = array_pad($row, 7, null);
+            $name = trim((string) $name);
+            if ($name === '') continue;
+
+            Item::create([
+                'name'         => $name,
+                'sku'          => trim((string) $sku),
+                'unit'         => trim((string) $unit),
+                'quantity'     => (int) $qty,
+                'min_stock'    => (int) $minStock,
+                'price'        => (float) $price,
+                'warehouse_id' => $warehouseByName[mb_strtolower(trim((string) $whName))] ?? null,
+            ]);
+            $imported++;
+        }
+
+        return $response->withHeader('Location', '/items?imported=' . $imported)->withStatus(302);
     }
 }
