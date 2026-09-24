@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #999; padding: 5px 8px; text-align: left; }
+    th { background: #eee; }
+</style>
+</head>
+<body>
+    <h2>Danh sách nhà kho</h2>
+    <table>
+        <thead><tr><th>Tên kho</th><th>Vị trí</th><th>Mô tả</th></tr></thead>
+        <tbody>
+        {% for w in warehouses %}
+            <tr><td>{{ w.name }}</td><td>{{ w.location }}</td><td>{{ w.description }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

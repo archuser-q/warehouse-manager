@@ -12,6 +12,10 @@ return function (\Slim\App $app) {
     $app->get('/warehouses', [WarehouseController::class, 'index']);
     $app->get('/warehouses/create', [WarehouseController::class, 'createForm']);
     $app->post('/warehouses', [WarehouseController::class, 'store']);
+    $app->get('/warehouses/export/excel', [WarehouseController::class, 'exportExcel']);
+    $app->get('/warehouses/export/pdf', [WarehouseController::class, 'exportPdf']);
+    $app->get('/warehouses/import', [WarehouseController::class, 'importForm']);
+    $app->post('/warehouses/import', [WarehouseController::class, 'importExcel']);
     $app->get('/warehouses/{id}', [WarehouseController::class, 'show']);
     $app->get('/warehouses/{id}/edit', [WarehouseController::class, 'editForm']);
     $app->post('/warehouses/{id}', [WarehouseController::class, 'update']);
