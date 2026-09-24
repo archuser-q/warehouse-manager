@@ -3,6 +3,7 @@
 use App\Controllers\DashboardController;
 use App\Controllers\WarehouseController;
 use App\Controllers\ItemController;
+use App\Controllers\AuthController;
 
 return function (\Slim\App $app) {
     $app->get('/', [DashboardController::class, 'index']);
@@ -37,4 +38,9 @@ return function (\Slim\App $app) {
     // History (Lịch sử)
     $app->get('/items/{id}/receive', [ItemController::class, 'receiveForm']);
     $app->post('/items/{id}/receive', [ItemController::class, 'receive']);
+
+    // Authentication (Xác thực)
+    $app->get('/login', [AuthController::class, 'loginForm']);
+    $app->post('/login', [AuthController::class, 'login']);
+    $app->post('/logout', [AuthController::class, 'logout']);
 };

@@ -11,7 +11,8 @@
         "php-di/php-di": "^7.0",
         "illuminate/database": "^13.32",
         "dompdf/dompdf": "^3.1",
-        "phpoffice/phpspreadsheet": "^5.10"
+        "phpoffice/phpspreadsheet": "^5.10",
+        "firebase/php-jwt": "^7.2"
     },
     "autoload": {
         "psr-4": {

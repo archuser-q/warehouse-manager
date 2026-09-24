@@ -48,6 +48,19 @@
             <a href="/warehouses" class="{{ currentPath starts with '/warehouses' ? 'active' : '' }}"><i class="fa-solid fa-building me-2"></i>Nhà kho</a>
             <a href="/items" class="{{ currentPath starts with '/items' ? 'active' : '' }}"><i class="fa-solid fa-boxes-stacked me-2"></i>Vật dụng</a>
         </nav>
+        <nav>
+            <a href="/dashboard" class="{{ (currentPath == '/' or currentPath == '/dashboard') ? 'active' : '' }}"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+            <a href="/warehouses" class="{{ currentPath starts with '/warehouses' ? 'active' : '' }}"><i class="fa-solid fa-building me-2"></i>Nhà kho</a>
+            <a href="/items" class="{{ currentPath starts with '/items' ? 'active' : '' }}"><i class="fa-solid fa-boxes-stacked me-2"></i>Vật dụng</a>
+        </nav>
+        {% if currentUser %}
+        <div class="mt-auto p-3" style="position: absolute; bottom: 0; width: 240px;">
+            <div class="text-light small mb-2"><i class="fa-solid fa-user me-1"></i>{{ currentUser }}</div>
+            <form method="post" action="/logout">
+                <button class="btn btn-sm btn-outline-light w-100"><i class="fa-solid fa-right-from-bracket me-1"></i>Đăng xuất</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     <div class="flex-fill p-4">
         {% block content %}{% endblock %}

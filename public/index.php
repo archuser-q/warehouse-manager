@@ -4,10 +4,10 @@ use DI\Container;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
+use App\Middleware\AuthMiddleware;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// Nạp biến môi trường từ .env
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->safeLoad();
 
@@ -24,17 +24,18 @@ $errorMiddleware = $app->addErrorMiddleware(
     true
 );
 
-// Thiết lập Twig template engine
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
 $app->add(TwigMiddleware::create($app, $twig));
 
-// Truyền đường dẫn hiện tại vào Twig để làm nổi bật mục đang chọn trên sidebar
 $app->add(function ($request, $handler) use ($twig) {
     $twig->getEnvironment()->addGlobal('currentPath', $request->getUri()->getPath());
+    $user = $request->getAttribute('user');
+    $twig->getEnvironment()->addGlobal('currentUser', $user['username'] ?? null);
     return $handler->handle($request);
 });
 
-// Nạp routes
+$app->add(new AuthMiddleware());
+
 (require __DIR__ . '/../routes/web.php')($app);
 
 $app->run();

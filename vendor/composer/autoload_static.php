@@ -99,6 +99,7 @@ class ComposerStaticInitca56ea41cf0fb13cccb73b188374e99c
         'F' =>
         array (
             'FontLib\\' => 8,
+            'Firebase\\JWT\\' => 13,
             'Fig\\Http\\Message\\' => 17,
             'FastRoute\\' => 10,
         ),
@@ -276,6 +277,10 @@ class ComposerStaticInitca56ea41cf0fb13cccb73b188374e99c
         'FontLib\\' =>
         array (
             0 => __DIR__ . '/..' . '/dompdf/php-font-lib/src/FontLib',
+        ),
+        'Firebase\\JWT\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
         'Fig\\Http\\Message\\' =>
         array (
